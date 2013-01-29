@@ -6,12 +6,14 @@ use JSON;
 use Data::Dumper;
 use YAML;
 use 5.010;
+use Net::SSH::Expect;
 
 #
 # VARIABLES
 #
 
 # Environment variables shared vith nova via .novarc
+system ". $ENV{HOME}/.novarc";    # source nova config
 my $USERNAME = $ENV{OS_USERNAME};
 my $API_KEY  = $ENV{OS_PASSWORD};
 
@@ -65,10 +67,10 @@ sub create_server {
 
     my $server = {
         'server' => {
-            'imageRef'  => '3afe97b2-26dc-49c5-a2cc-a2fc8d80c001',
+            'imageRef'  => '8a3a9f96-b997-46fd-b7a8-a9e740796ffd',
             'flavorRef' => '2',
             'name'      => $name,
-            'metadata'  => { 'My Server Name' => 'Ubuntu 11.10 server' }
+            'metadata'  => { 'My Server Name' => 'Ubuntu 12.10 (Quantal Quetzal)' }
         }
     };
 
@@ -99,7 +101,28 @@ sub create_server {
 sub ssh_to_server {
     my ( $ip, $pass ) = @_;
 
-    system "ssh -o StrictHostKeyChecking=no root\@$ip 'ls -la'";
+    # Making an ssh connection with user-password authentication
+    # 1) construct the object
+    my $ssh = Net::SSH::Expect->new (
+        host => $ip,
+        password=> $pass,
+        user => 'root',
+        raw_pty => 1
+    );
+
+    # 2) logon to the SSH server using those credentials.
+    # test the login output to make sure we had success
+    my $login_output = $ssh->login();
+    if ($login_output !~ /Welcome/) {
+        die "Login has failed. Login output was $login_output";
+    }
+
+    # runs arbitrary commands and print their outputs
+    # (including the remote prompt comming at the end)
+    my $ls = $ssh->exec("ls -l /");
+    print($ls);
+
+    #system "ssh -o StrictHostKeyChecking=no root\@$ip 'ls -la'";
 }
 
 sub get_server_ip {
@@ -143,7 +166,7 @@ sub delete_server {
     my $res = $ua->request($req);
 
     if ( $res->is_success ) {
-        print "Server with id '$id' deleted\n";
+        print "Server with id '$id' will be deleted\n";
     } else {
         print $res->status_line, "\n";
         print "Server with id '$id' not found\n";
