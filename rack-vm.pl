@@ -99,7 +99,7 @@ sub create_server {
     return $pass, $id;
 }
 
-sub copy_ssh_to_server {
+sub copy_ssh_key_to_server {
     my ( $ip, $pass ) = @_;
 
     # Get my SSH public key
@@ -213,8 +213,15 @@ given ($cmd) {
             last;    # exit infinite while loop
         }
 
-        my $ip = get_server_ip( $account, $token, $id );
-        copy_ssh_to_server( $ip, $pass );
+        # Get IP address (not ready immediately after VM is active?)
+        my $ip;
+        until ( $ip =~ /^\d+\.\d+\.\d+\.\d+$/ ) {
+            $ip = get_server_ip( $account, $token, $id );
+            sleep 3;
+        }
+
+        copy_ssh_key_to_server( $ip, $pass );
+
     }
     when (/delete/) { delete_server( $account, $token, $second_arg ) }
     default { print "Uknown command '$cmd'.\n" }
