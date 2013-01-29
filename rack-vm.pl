@@ -7,6 +7,7 @@ use Data::Dumper;
 use YAML;
 use 5.010;
 use Net::SSH::Expect;
+use autodie;
 
 #
 # VARIABLES
@@ -98,10 +99,14 @@ sub create_server {
     return $pass, $id;
 }
 
-sub ssh_to_server {
+sub copy_ssh_to_server {
     my ( $ip, $pass ) = @_;
 
-    # Making an ssh connection with user-password authentication
+    # Get my SSH public key
+    open my($ssh_key_fh), "$ENV{HOME}/.ssh/id_rsa.pub";
+    chomp(my $ssh_key = <$ssh_key_fh>);
+    close $ssh_key_fh;
+
     # 1) construct the object
     my $ssh = Net::SSH::Expect->new (
         host => $ip,
@@ -113,14 +118,16 @@ sub ssh_to_server {
     # 2) logon to the SSH server using those credentials.
     # test the login output to make sure we had success
     my $login_output = $ssh->login();
-    if ($login_output !~ /Welcome/) {
+    if ($login_output !~ /Welcome/) { # Ubuntu
         die "Login has failed. Login output was $login_output";
     }
 
     # runs arbitrary commands and print their outputs
     # (including the remote prompt comming at the end)
-    my $ls = $ssh->exec("ls -l /");
-    print($ls);
+    print $ssh->exec("[[ -d ~/.ssh ]] || mkdir -p ~/.ssh");
+    print $ssh->exec("chmod 700 ~/.ssh");
+    print $ssh->exec("echo $ssh_key >> ~/.ssh/authorized_keys");
+    print $ssh->exec("chmod 600 ~/.ssh/authorized_keys");
 
     #system "ssh -o StrictHostKeyChecking=no root\@$ip 'ls -la'";
 }
@@ -207,7 +214,7 @@ given ($cmd) {
         }
 
         my $ip = get_server_ip( $account, $token, $id );
-        ssh_to_server( $ip, $pass );
+        copy_ssh_to_server( $ip, $pass );
     }
     when (/delete/) { delete_server( $account, $token, $second_arg ) }
     default { print "Uknown command '$cmd'.\n" }
