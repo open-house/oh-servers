@@ -42,3 +42,17 @@ to install it:
 to list the VMs:
 
     nova list
+
+## oh-mysql
+
+Install MySQL database on a VM.
+
+Create configuration file `./oh-servers`:
+
+    export OH_MYSQL_PASS=<root_db_pass>
+
+Make sure the file is protected: `chmod 600 ~/.oh-servers`
+
+Install the database server:
+
+    oh-mysql-install <hostname>

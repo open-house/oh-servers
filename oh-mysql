@@ -1,0 +1,20 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use Net::SSH qw(ssh_cmd);
+
+my $host = shift;
+my $pass = $ENV{OH_MYSQL_PASS};
+my $user = 'root';
+
+die "Usage: $0 <host>\n" unless defined $host;
+
+my @cmds = (
+    "debconf-set-selections <<< 'mysql-server mysql-server/root_password password $pass'",
+    "debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password $pass'",
+    "DEBIAN_FRONTEND=noninteractive aptitude -y install mysql-server",
+);
+for my $cmd ( @cmds ) {
+    ssh_cmd("$user\@$host", $cmd);
+}
+
