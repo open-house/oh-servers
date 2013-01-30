@@ -1,18 +1,16 @@
-# OH servers
+# oh-servers
 
-Scripts for creating or deleting VMs and installings software on them.
+Scripts for VM provisioning and installing software on VMs.
 
 ## rack-vm
 
 Creates or deletes Rackspace VMs. Copy `rack-vm-create`, `rack-vm-delete` and
 `rack-vm` to `/usr/local/bin`.
 
-To create a VM:
+To create a VM (`<hostname>` must be unique):
 
     rack-vm-create <hostname>
 
-To create a VM:
+To delete a VM:
 
     rack-vm-delete <hostname>
-
-`<hostname>` must be unique.
