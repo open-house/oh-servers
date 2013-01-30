@@ -53,6 +53,8 @@ Create configuration file `./oh-servers`:
 
 Make sure the file is protected: `chmod 600 ~/.oh-servers`
 
+Copy `oh-mysql` and `oh-mysql-install` to `/usr/local/bin`.
+
 Install the database server:
 
     oh-mysql-install <hostname>
