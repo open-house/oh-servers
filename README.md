@@ -2,10 +2,10 @@
 
 Scripts for VM provisioning and installing software on VMs.
 
-## rack-vm
+## oh-rack-vm
 
-Creates or deletes Rackspace VMs. Copy `rack-vm-create`, `rack-vm-delete` and
-`rack-vm` to `/usr/local/bin`.
+Creates or deletes Rackspace VMs. Copy `oh-rack-vm-create`, `oh-rack-vm-delete` and
+`oh-rack-vm` to `/usr/local/bin`.
 
 To be able to use Rackspace API create a configuration file `~/.novarc`:
 
@@ -23,11 +23,11 @@ Make sure the file is protected: `chmod 600 ~/.novarc`
 
 To create a VM (`<hostname>` must be unique):
 
-    rack-vm-create <hostname>
+    oh-rack-vm-create <hostname>
 
 To delete a VM:
 
-    rack-vm-delete <hostname>
+    oh-rack-vm-delete <hostname>
 
 ## nova client
 
