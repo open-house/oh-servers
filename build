@@ -1,5 +1,0 @@
-#!/bin/bash
-
-. ~/.novarc
-/home/jreisinger/work/rack-vm/rack-vm.pl create $1-$2
-#/home/jreisinger/work/rack-vm/rack-vm.pl delete <hostname>
