@@ -1,4 +1,4 @@
 #!/bin/bash
 
 . ~/.novarc
-/home/jreisinger/work/rack-vm/rack-vm.pl create test01
+/home/jreisinger/work/rack-vm/rack-vm.pl create $1-$2

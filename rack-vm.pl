@@ -143,6 +143,17 @@ sub get_server_ip {
     }
 }
 
+sub get_server_id {
+    my ( $account, $token, $hostname ) = @_;
+
+    my $perl_ds = list_servers( $account, $token );
+    for my $server ( @{ $perl_ds->{servers} } ) {
+        if ( $server->{name} eq $hostname ) {
+            return $server->{id};
+        }
+    }
+}
+
 sub list_servers {
     my ( $account, $token ) = @_;
 
@@ -163,7 +174,9 @@ sub list_servers {
 }
 
 sub delete_server {
-    my ( $account, $token, $id ) = @_;
+    my ( $account, $token, $hostname ) = @_;
+
+    my $id = get_server_id($account, $token, $hostname);
 
     my $req =
       HTTP::Request->new( DELETE =>
@@ -173,10 +186,10 @@ sub delete_server {
     my $res = $ua->request($req);
 
     if ( $res->is_success ) {
-        print "Server with id '$id' will be deleted\n";
+        print "Server '$hostname' with id '$id' will be deleted\n";
     } else {
         print $res->status_line, "\n";
-        print "Server with id '$id' not found\n";
+        print "Server '$hostname' with id '$id' not found\n";
     }
 }
 
