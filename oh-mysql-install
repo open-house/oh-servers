@@ -4,8 +4,8 @@
 # source configuration with environment variables
 . ~/.oh-servers
 
-# Get this script's directory
+# get this script's directory
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
-# Run the real script
-$DIR/oh-mysql $1
+# run the real script
+$DIR/oh-mysql $1 'install'

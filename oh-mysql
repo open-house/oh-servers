@@ -2,19 +2,50 @@
 use strict;
 use warnings;
 use Net::SSH qw(ssh_cmd);
+use 5.010;
+use DBI;
 
 my $host = shift;
+my $cmd  = shift;
 my $pass = $ENV{OH_MYSQL_PASS};
 my $user = 'root';
 
-die "Usage: $0 <host>\n" unless defined $host;
+die "Usage: $0 <host> <command>\n" unless $host and $cmd;
 
-my @cmds = (
-    "debconf-set-selections <<< 'mysql-server mysql-server/root_password password $pass'",
-    "debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password $pass'",
-    "DEBIAN_FRONTEND=noninteractive aptitude -y install mysql-server",
-);
-for my $cmd ( @cmds ) {
-    ssh_cmd("$user\@$host", $cmd);
+given ($cmd) {
+    when (/^install$/) {
+
+        # Install DB server
+        my @cmds = (
+"debconf-set-selections <<< 'mysql-server mysql-server/root_password password $pass'",
+"debconf-set-selections <<< 'mysql-server mysql-server/root_password_again password $pass'",
+            "DEBIAN_FRONTEND=noninteractive aptitude -y install mysql-server",
+        );
+        for my $cmd (@cmds) {
+            ssh_cmd( "$user\@$host", $cmd );
+        }
+    }
+    when (/^sql$/) {
+
+        # Create DB for pipeline_service
+
+        # create temporary ssh tunnel to remote DB server
+        system "ssh -f -L 7777:localhost:3306 root\@$host sleep 10";
+
+        # create DB
+        my $dsn = "DBI:mysql:;host=127.0.0.1;port=7777";
+        my $dbh = DBI->connect($dsn, 'root', $pass);
+        my $rc = $dbh->func('createdb', 'pipeline_service', 'admin');
+        $dbh = DBI->connect($dsn, 'root', $pass); # need to reconnect, why?
+        $dbh->do("CREATE USER 'pipeline_service'\@'localhost' IDENTIFIED BY 'pipeline_service'");
+        $dbh->do("GRANT ALL on pipeline_service.* TO pipeline_service\@localhost");
+
+        #my $sql =
+        #    "CREATE DATABASE pipeline_service;"
+        #  . "CREATE USER pipeline_service\@localhost IDENTIFIED BY 'pipeline_service';"
+        #  . "GRANT ALL on pipeline_service.* to pipeline_service\@localhost;";
+        #system "mysql -u root --password=$pass -h 127.0.0.1 -P 7777 -e '$sql'";
+    }
+    default { print "Uknown command '$cmd'.\n" }
 }
 

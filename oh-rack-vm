@@ -56,11 +56,8 @@ sub authenticate {
         my $perl_ds = decode_json $res->content;
         $account = $perl_ds->{'access'}->{'token'}->{'tenant'}->{'id'};
         $token   = $perl_ds->{'access'}->{'token'}->{'id'};
-    } else {
-        print $res->status_line, "\n";
+        return $account, $token;
     }
-
-    return $account, $token;
 }
 
 sub create_server {
@@ -93,11 +90,8 @@ sub create_server {
         my $perl_ds = decode_json $res->content;
         $pass = $perl_ds->{server}->{adminPass};
         $id   = $perl_ds->{server}->{'id'};
-    } else {
-        print $res->status_line, "\n";
+        return $pass, $id;
     }
-
-    return $pass, $id;
 }
 
 sub copy_ssh_key_to_server {
@@ -117,20 +111,13 @@ sub copy_ssh_key_to_server {
     );
 
     # 2) logon to the SSH server using those credentials.
-    # test the login output to make sure we had success
     my $login_output = $ssh->login();
-    if ( $login_output !~ /Welcome/ ) {    # Ubuntu
-        die "Login has failed. Login output was $login_output";
-    }
 
-    # runs arbitrary commands and print their outputs
-    # (including the remote prompt comming at the end)
-    print $ssh->exec("[[ -d ~/.ssh ]] || mkdir -p ~/.ssh");
-    print $ssh->exec("chmod 700 ~/.ssh");
-    print $ssh->exec("echo $ssh_key >> ~/.ssh/authorized_keys");
-    print $ssh->exec("chmod 600 ~/.ssh/authorized_keys");
-
-    #system "ssh -o StrictHostKeyChecking=no root\@$ip 'ls -la'";
+    # runs arbitrary commands
+    $ssh->exec("[[ -d ~/.ssh ]] || mkdir -p ~/.ssh");
+    $ssh->exec("chmod 700 ~/.ssh");
+    $ssh->exec("echo $ssh_key >> ~/.ssh/authorized_keys");
+    $ssh->exec("chmod 600 ~/.ssh/authorized_keys");
 }
 
 sub get_server_ip {
@@ -191,7 +178,7 @@ sub delete_server {
     if ( $res->is_success ) {
         print "Server '$hostname' with id '$id' will be deleted\n";
     } else {
-        print $res->status_line, "\n";
+        #print $res->status_line, "\n";
         print "Server '$hostname' with id '$id' not found\n";
     }
 }
@@ -220,7 +207,7 @@ given ($cmd) {
             unless ($server->{id} eq $id
                 and $server->{'OS-EXT-STS:vm_state'} eq 'active' )
             {
-                print $server->{name} . " - "
+                print STDERR $server->{name} . " - "
                   . $server->{'OS-EXT-STS:vm_state'} . " ("
                   . $server->{progress} . " %)\n";
                 sleep 5;
@@ -231,14 +218,15 @@ given ($cmd) {
         }
 
         # Get IP address (not ready immediately after VM is active?)
-        my $ip;
+        my $ip = 0;
         until ( $ip =~ /^\d+\.\d+\.\d+\.\d+$/ ) {
             $ip = get_server_ip( $account, $token, $id );
             sleep 3;
         }
 
         copy_ssh_key_to_server( $ip, $pass );
-
+        # print to STDOUT - will be use by the wrapper script!
+        print $ip;
     }
     when (/^delete$/) { delete_server( $account, $token, $hostname ) }
     default { print "Uknown command '$cmd'.\n" }

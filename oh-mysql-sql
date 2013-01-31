@@ -1,14 +1,11 @@
 #!/bin/bash
-# Wrapper script to export environment variables.
+# Wrapper script to export environment variables
 
 # source configuration with environment variables
-. ~/.novarc
+. ~/.oh-servers
 
 # get this script's directory
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )" && pwd )"
 
 # run the real script
-IP=$($DIR/oh-rack-vm create $1)
-
-# can be used by the calling script
-echo -n $IP
+$DIR/oh-mysql $1 'sql'
