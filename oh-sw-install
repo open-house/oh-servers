@@ -13,7 +13,7 @@ my @cmds = (
 deb http://repos.openhouse.sk/debian squeeze main
 EOF',
 'apt-get update',
-'apt-get -y install oh-pipeline-service',
+'DEBIAN_FRONTEND=noninteractive apt-get -y install oh-pipeline-service',
 '[[ -e /usr/lib/jvm/jdk/bin/java ]] || ( mkdir -p /usr/lib/jvm/jdk/bin/ && ln -s /usr/bin/java /usr/lib/jvm/jdk/bin/java )',
 '/etc/init.d/oh-pipeline-service start',
 );
