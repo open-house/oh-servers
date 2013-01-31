@@ -2,17 +2,21 @@
 
 Scripts for VM provisioning and installing software on VMs.
 
-* oh-mysql-install -- install MySQL database
-* oh-mysql-sql-pipeline-service -- execute MySQL commands
 * oh-rack-vm-create -- create Rackspace VM
 * oh-rack-vm-delete -- deltete Rackaspace VM
+* oh-mysql-install -- install MySQL database
+* oh-mysql-sql-pipeline-service -- execute MySQL commands
 * oh-sw-install-pipeline-service -- install SW
 
 ## Usage
 
+### Copy scripts
+
 Copy all scripts to `/usr/local/bin`:
 
     cp oh-* /usr/local/bin
+
+### Create configuration files
 
 To be able to use Rackspace API create a configuration file `~/.novarc`:
 
@@ -38,15 +42,24 @@ Make sure the file is protected:
 
     chmod 600 ~/.oh-servers
 
-Add following to oh-pipeline-service `build` script:
+### Use the scripts
 
-    # Create Rackspace VM and install DB + SW
-    IP=$(oh-rack-vm-create ${PACKAGE}_${VERSION})
+To create a VM:
+
+    oh-rack-vm-create <vm_name>
+    
+.. script prints VMs public IP address to STDOUT - you can use in in a shell script like this:
+
+    IP=$(oh-rack-vm-create <vm_name>)
     oh-mysql-install $IP
     oh-mysql-sql-pipeline-service $IP
     oh-sw-install-pipeline-service $IP
+    
+To delete a VM:
 
-## nova client (optional)
+    oh-rack-vm-delete <vm_name>
+
+### nova client (optional)
 
 To get a list of VMs from command line, you can use nova client.
 
