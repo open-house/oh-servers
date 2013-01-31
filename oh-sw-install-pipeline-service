@@ -19,7 +19,7 @@ EOF',
 );
 
 for my $cmd ( @cmds ) {
-    print "--> Running '$cmd'\n";
+    print "==> Running '$cmd'\n";
     eval { ssh_cmd( "root\@$host", $cmd ); };
     print "Continuing after error: $@" if $@;
 }

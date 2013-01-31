@@ -22,7 +22,9 @@ given ($cmd) {
             "DEBIAN_FRONTEND=noninteractive aptitude -y install mysql-server",
         );
         for my $cmd (@cmds) {
-            ssh_cmd( "$user\@$host", $cmd );
+            print "==> Running '$cmd'\n";
+            eval { ssh_cmd( "$user\@$host", $cmd ); };
+            print "Continuing after error: $@" if $@;
         }
     }
     when (/^sql$/) {

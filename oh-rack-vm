@@ -207,10 +207,10 @@ given ($cmd) {
             unless ($server->{id} eq $id
                 and $server->{'OS-EXT-STS:vm_state'} eq 'active' )
             {
-                #print STDERR $server->{name} . " - "
-                #  . $server->{'OS-EXT-STS:vm_state'} . " ("
-                #  . $server->{progress} . " %)\n";
-                sleep 5;
+                print STDERR $server->{name} . " - "
+                  . $server->{'OS-EXT-STS:vm_state'} . " ("
+                  . $server->{progress} . " %)\n";
+                sleep 10;
                 $n = 0 if $n >= @{ $perl_ds->{servers} };
                 redo;
             }
