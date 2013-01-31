@@ -1,0 +1,23 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use Net::SSH qw(ssh_cmd);
+
+my $host = shift;
+
+die "Usage: $0 <host>\n" unless $host;
+
+my @cmds = (
+'wget -q -O - http://repos.openhouse.sk/oh_repo.gpg.key | apt-key add -',
+'cat <<EOF > /etc/apt/sources.list.d/oh_repo.list
+deb http://repos.openhouse.sk/debian squeeze main
+EOF',
+'apt-get update',
+'apt-get -y install oh-pipeline-service',
+'[[ -e /usr/lib/jvm/jdk/bin/java ]] || ( mkdir -p /usr/lib/jvm/jdk/bin/ && ln -s /usr/bin/java /usr/lib/jvm/jdk/bin/java )',
+'/etc/init.d/oh-pipeline-service start',
+);
+
+for my $cmd ( @cmds ) {
+    ssh_cmd( "root\@$host", $cmd );
+}
