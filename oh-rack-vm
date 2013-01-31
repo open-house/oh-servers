@@ -176,10 +176,10 @@ sub delete_server {
     my $res = $ua->request($req);
 
     if ( $res->is_success ) {
-        print "Server '$hostname' with id '$id' will be deleted\n";
+        #print "Server '$hostname' with id '$id' will be deleted\n";
     } else {
         #print $res->status_line, "\n";
-        print "Server '$hostname' with id '$id' not found\n";
+        print STDERR "Server '$hostname' with id '$id' not found\n";
     }
 }
 
@@ -207,9 +207,9 @@ given ($cmd) {
             unless ($server->{id} eq $id
                 and $server->{'OS-EXT-STS:vm_state'} eq 'active' )
             {
-                print STDERR $server->{name} . " - "
-                  . $server->{'OS-EXT-STS:vm_state'} . " ("
-                  . $server->{progress} . " %)\n";
+                #print STDERR $server->{name} . " - "
+                #  . $server->{'OS-EXT-STS:vm_state'} . " ("
+                #  . $server->{progress} . " %)\n";
                 sleep 5;
                 $n = 0 if $n >= @{ $perl_ds->{servers} };
                 redo;
@@ -229,6 +229,6 @@ given ($cmd) {
         print $ip;
     }
     when (/^delete$/) { delete_server( $account, $token, $hostname ) }
-    default { print "Uknown command '$cmd'.\n" }
+    default { print STDERR "Uknown command '$cmd'.\n" }
 }
 
