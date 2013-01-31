@@ -112,6 +112,7 @@ sub copy_ssh_key_to_server {
 
     # 2) logon to the SSH server using those credentials.
     my $login_output = $ssh->login();
+    sleep 10;
 
     # runs arbitrary commands
     $ssh->exec("[[ -d ~/.ssh ]] || mkdir -p ~/.ssh");
