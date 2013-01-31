@@ -21,3 +21,5 @@ EOF',
 for my $cmd ( @cmds ) {
     ssh_cmd( "root\@$host", $cmd );
 }
+
+exit 0;

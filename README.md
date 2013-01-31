@@ -41,7 +41,7 @@ Make sure the file is protected:
 Add following to oh-pipeline-service `build` script:
 
     # Create Rackspace VM and install DB + SW
-    IP=$(oh-rack-vm-create $PACKAGE_$VERSION)
+    IP=$(oh-rack-vm-create ${PACKAGE}_${VERSION})
     oh-mysql-install $IP
     oh-mysql-sql-pipeline-service $IP
     oh-sw-install-pipeline-service $IP
