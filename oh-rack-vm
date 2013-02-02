@@ -228,7 +228,7 @@ given ($cmd) {
 
         # Make sure the host is up
         my $p = Net::Ping->new("syn");
-        sleep(3) until $p->ping($host);
+        sleep(3) until $p->ping($ip);
         $p->close();
 
         copy_ssh_key_to_server( $ip, $pass );
