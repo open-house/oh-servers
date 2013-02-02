@@ -45,10 +45,8 @@ Make sure the file is protected:
 Create configuration file `~/.ssh/config`:
 
     # Bypass SSH key checking
-    # http://linuxcommando.blogspot.sk/2008/10/how-to-disable-ssh-host-key-checking.html
     Host *
        StrictHostKeyChecking no
-       UserKnownHostsFile=/dev/null
 
 ### Use the scripts
 
