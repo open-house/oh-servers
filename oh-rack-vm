@@ -8,6 +8,7 @@ use YAML;
 use 5.010;
 use Net::SSH::Expect;
 use autodie;
+use Net::Ping;
 
 #
 # VARIABLES
@@ -224,6 +225,11 @@ given ($cmd) {
             $ip = get_server_ip( $account, $token, $id );
             sleep 3;
         }
+
+        # Make sure the host is up
+        my $p = Net::Ping->new("syn");
+        sleep(3) until $p->ping($host);
+        $p->close();
 
         copy_ssh_key_to_server( $ip, $pass );
         # print to STDOUT - will be use by the wrapper script!
