@@ -69,11 +69,20 @@ To delete a VM:
 Jenkins job configuraion sample (Build => Execute shell => Command):
 
     #!/bin/bash
+
+    # source configuration (don't use -x!)
     . ~/.novarc
+
+    # now we can print commands before executing them
+    set -x
+
+    # create VM + install pipeline service
     IP=$(oh-rack-vm-create ${JOB_NAME}_${BUILD_NUMBER})
     oh-mysql-install $IP
     oh-mysql-sql-pipeline-service $IP
     oh-sw-install-pipeline-service $IP
+
+    # check pipeline service is running
     nc -z $IP 8080
     if [[ $? -eq 0 ]]; then
         echo "Service running on $IP, port 8080"
