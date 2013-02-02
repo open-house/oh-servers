@@ -43,6 +43,7 @@ Make sure the file is protected:
     chmod 600 ~/.oh-servers
 
 Create configuration file `~/.ssh/config`:
+
     # Bypass SSH key checking
     # http://linuxcommando.blogspot.sk/2008/10/how-to-disable-ssh-host-key-checking.html
     Host *
