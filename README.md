@@ -34,13 +34,20 @@ Make sure the file is protected:
 
     chmod 600 ~/.novarc
 
-Create configuration file `./oh-servers`:
+Create configuration file `~/.oh-servers`:
 
     export OH_MYSQL_PASS=<root_db_pass>
 
 Make sure the file is protected:
 
     chmod 600 ~/.oh-servers
+
+Create configuration file `~/.ssh/config`:
+    # Bypass SSH key checking
+    # http://linuxcommando.blogspot.sk/2008/10/how-to-disable-ssh-host-key-checking.html
+    Host *
+       StrictHostKeyChecking no
+       UserKnownHostsFile=/dev/null
 
 ### Use the scripts
 
