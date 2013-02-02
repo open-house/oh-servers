@@ -66,6 +66,25 @@ To delete a VM:
 
     oh-rack-vm-delete <vm_name>
 
+Jenkins job configuraion sample (Build => Execute shell => Command):
+
+    #!/bin/bash
+    . ~/.novarc
+    IP=$(oh-rack-vm-create ${JOB_NAME}_${BUILD_NUMBER})
+    oh-mysql-install $IP
+    oh-mysql-sql-pipeline-service $IP
+    oh-sw-install-pipeline-service $IP
+    nc -z $IP 8080
+    if [[ $? -eq 0 ]]; then
+        echo "Service running on $IP, port 8080"
+        exit 0
+    else
+        exit 1
+    fi
+
+.. don't forge the first line (`#!/bin/bash`), otherwise Jenkins will print out the
+API key.
+
 ### nova client (optional)
 
 To get a list of VMs from command line, you can use nova client.
