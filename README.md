@@ -103,7 +103,11 @@ to install it:
     aptitude install python-pip
     pip install rackspace-novaclient
 
-to list the VMs:
+command:
 
+    nova credentials
     nova list
-
+    nova flavor-list
+    nova image-list
+    nova boot test01 --flavor 2 --image 8a3a9f96-b997-46fd-b7a8-a9e740796ffd
+    nova delete <SERVER_ID>
