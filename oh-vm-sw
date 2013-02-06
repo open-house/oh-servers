@@ -1,0 +1,47 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use Net::SSH qw(ssh_cmd);
+
+my $host = shift;
+
+die "Usage: $0 <host>\n" unless $host;
+
+my %cmd = (
+    upgrade => [
+
+        #'apt-get update && apt-get -y upgrade && reboot',
+        'apt-get update && apt-get -y upgrade',
+    ],
+    puppet_master => [
+        'wget http://apt.puppetlabs.com/puppetlabs-release-precise.deb',
+        'dpkg -i puppetlabs-release-precise.deb',
+        'apt-get -y install puppetmaster',
+    ],
+    puppet_client => [
+        'wget http://apt.puppetlabs.com/puppetlabs-release-precise.deb',
+        'dpkg -i puppetlabs-release-precise.deb',
+        'apt-get -y install puppet',
+    ],
+    pipeline_service => [
+'wget -q -O - http://repos.openhouse.sk/oh_repo.gpg.key | apt-key add -',
+'cat <<EOF > /etc/apt/sources.list.d/oh_repo.list
+deb http://repos.openhouse.sk/debian squeeze main
+EOF',
+'apt-get update',
+'DEBIAN_FRONTEND=noninteractive apt-get -y install oh-pipeline-service',
+'[[ -e /usr/lib/jvm/jdk/bin/java ]] || ( mkdir -p /usr/lib/jvm/jdk/bin/ && ln -s /usr/bin/java /usr/lib/jvm/jdk/bin/java )',
+'/etc/init.d/oh-pipeline-service start',
+    ],
+);
+
+for my $cmd ( keys %cmd ) {
+    print "--> Running command '$cmd'\n";
+    for my $sub_cmd ( @{ $cmd{$cmd} } ) {
+        print "==> Running sub-command '$sub_cmd'\n";
+        eval { ssh_cmd( "root\@$host", $sub_cmd ); };
+        print "Continuing after error: $@" if $@;
+    }
+}
+
+exit 0;
