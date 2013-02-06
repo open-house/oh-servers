@@ -17,7 +17,9 @@ open my $fh, "<", $conf;
 while (<$fh>) {
     chomp;
     next unless /=/;
-    my($k, $v) = split /=/, $_, 2;
+    my ( $k, $v ) = split /=/, $_, 2;
+    $v =~ s/^(['"])(.*)\1/$2/;             # fix possible quotes
+    $v =~ s/\$([a-zA-Z]\w*)/$ENV{$1}/g;    # fix possible $variables
     $ENV{$k} = $v;
 }
 
