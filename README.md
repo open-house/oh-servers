@@ -2,8 +2,7 @@
 
 Scripts for VM provisioning and installing software on VMs.
 
-* oh-rack-vm-create -- create Rackspace VM
-* oh-rack-vm-delete -- deltete Rackaspace VM
+* oh-rack-vm -- create/delete Rackspace VM
 * oh-mysql-install -- install MySQL database
 * oh-mysql-sql-pipeline-service -- execute MySQL commands
 * oh-sw-install-pipeline-service -- install SW
@@ -52,18 +51,18 @@ Create configuration file `~/.ssh/config`:
 
 To create a VM:
 
-    oh-rack-vm-create <vm_name>
+    oh-rack-vm create <vm_name>
     
 .. script prints VMs public IP address to STDOUT - you can use in in a shell script like this:
 
-    IP=$(oh-rack-vm-create <vm_name>)
+    IP=$(oh-rack-vm create <vm_name>)
     oh-mysql-install $IP
     oh-mysql-sql-pipeline-service $IP
     oh-sw-install-pipeline-service $IP
     
 To delete a VM:
 
-    oh-rack-vm-delete <vm_name>
+    oh-rack-vm delete <vm_name>
 
 Jenkins job configuraion sample (Build => Execute shell => Command):
 
@@ -76,7 +75,7 @@ Jenkins job configuraion sample (Build => Execute shell => Command):
     set -x
 
     # create VM + install pipeline service
-    IP=$(oh-rack-vm-create ${JOB_NAME}_${BUILD_NUMBER})
+    IP=$(oh-rack-vm create ${JOB_NAME}_${BUILD_NUMBER})
     oh-mysql-install $IP
     oh-mysql-sql-pipeline-service $IP
     oh-sw-install-pipeline-service $IP
