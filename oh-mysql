@@ -4,13 +4,26 @@ use warnings;
 use Net::SSH qw(ssh_cmd);
 use 5.010;
 use DBI;
+use Rackspace;
 
 my $host = shift;
 my $cmd  = shift;
+
+#
+# VARIABLES
+#
+my $env = source("$ENV{HOME}/.oh-servers");
+for my $k ( keys %$env ) {
+    $ENV{$k} = $env->{$k};
+}
 my $pass = $ENV{OH_MYSQL_PASS};
 my $user = 'root';
 
 die "Usage: $0 <host> <command>\n" unless $host and $cmd;
+
+#
+# MAIN
+#
 
 given ($cmd) {
     when (/^install$/) {

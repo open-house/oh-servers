@@ -35,7 +35,8 @@ Make sure the file is protected:
 
 Create configuration file `~/.oh-servers`:
 
-    export OH_MYSQL_PASS=<root_db_pass>
+    OH_MYSQL_PASS=<root_db_pass>
+    export OH_MYSQL_PASS
 
 Make sure the file is protected:
 
