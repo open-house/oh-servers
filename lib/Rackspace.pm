@@ -6,7 +6,8 @@ use JSON;
 use MIME::Base64;
 
 use Exporter qw(import);
-our @EXPORT = qw( authenticate create_server list_servers delete_server source );
+our @EXPORT = qw( authenticate create_server list_servers delete_server source
+get_server_ip );
 
 sub source {
     # Source environment variables by parsing config file
