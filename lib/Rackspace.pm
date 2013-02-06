@@ -6,10 +6,29 @@ use JSON;
 use MIME::Base64;
 
 use Exporter qw(import);
-our @EXPORT = qw( authenticate create_server list_servers delete_server );
+our @EXPORT = qw( authenticate create_server list_servers delete_server source );
+
+sub source {
+    # Source environment variables by parsing config file
+    my $conf = shift;
+
+    my %env;
+
+    open my $fh, "<", $conf;
+    while (<$fh>) {
+        chomp;
+        next unless /=/;
+        my ( $k, $v ) = split /=/, $_, 2;
+        $v =~ s/^(['"])(.*)\1/$2/;             # fix possible quotes
+        $v =~ s/\$([a-zA-Z]\w*)/$ENV{$1}/g;    # fix possible $variables
+        $env{$k} = $v;
+    }
+
+    return \%env;
+}
 
 sub authenticate {
-    my ($username, $api_key) = @_;
+    my ( $username, $api_key ) = @_;
 
     # Create a request
     my $req =
@@ -89,6 +108,7 @@ sub create_server {
         $id   = $perl_ds->{server}->{'id'};
         return $pass, $id;
     } else {
+
         #print STDERR ">>>", $res->status_line, "<<<\n";
     }
 }
@@ -114,7 +134,7 @@ sub get_server_id {
         }
     }
 
-    return 0; # meaning noexistent server
+    return 0;    # meaning noexistent server
 }
 
 sub list_servers {
@@ -153,8 +173,10 @@ sub delete_server {
     my $res = $ua->request($req);
 
     if ( $res->is_success ) {
+
         #print "Server '$hostname' with id '$id' will be deleted\n";
     } else {
+
         #print STDERR $res->status_line, "\n";
         print STDERR "Server '$hostname' with id '$id' not found\n";
     }

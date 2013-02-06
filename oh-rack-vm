@@ -11,19 +11,12 @@ use Rackspace;
 # VARIABLES
 #
 
-# Source environment variables by parsing config file
-my $conf = "$ENV{HOME}/.novarc";
-open my $fh, "<", $conf;
-while (<$fh>) {
-    chomp;
-    next unless /=/;
-    my ( $k, $v ) = split /=/, $_, 2;
-    $v =~ s/^(['"])(.*)\1/$2/;             # fix possible quotes
-    $v =~ s/\$([a-zA-Z]\w*)/$ENV{$1}/g;    # fix possible $variables
-    $ENV{$k} = $v;
-}
 
 # Environment variables shared vith nova via .novarc
+my $env = source("$ENV{HOME}/.novarc");
+for my $k ( keys %$env ) {
+    $ENV{$k} = $env->{$k};
+}
 my $USERNAME = $ENV{OS_USERNAME};
 my $API_KEY  = $ENV{OS_PASSWORD};
 
