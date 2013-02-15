@@ -1,5 +1,11 @@
 # oh-servers
 
+## TODO
+
+* `oh-vm-rack <name> { create | delete }` -- create/delete Rackspace VM (returns public IP)
+* `oh-vm-inst-puppet <IP_address>` -- install puppet (client)
+* `oh-vm-cmd <cmd1> [ <cmd2> .. <cmdN> ] <IP_address>` -- run arbitrary (puppet) commands via ssh
+
 Scripts for VM provisioning and installing software on VMs.
 
 * oh-rack-vm -- create/delete Rackspace VM
