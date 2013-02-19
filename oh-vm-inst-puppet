@@ -29,6 +29,7 @@ my %steps = (
     d_puppet_mysql => [
         "puppet module install puppetlabs/mysql",
         "LOCAL scp $script_dir/manifests/mysql.pp root\@$host:/etc/puppet/manifests/",
+        "puppet apply /etc/puppet/manifests/mysql.pp",
     ],
 );
 #>>>
@@ -42,7 +43,7 @@ for my $step ( sort keys %steps ) {
             eval { system $cmd };
             print "Continuing after error: $@" if $@;
         } else {
-            print "--> Running command '$cmd'\n";
+            print "--> Running REMOTE command '$cmd'\n";
             eval { ssh_cmd( "root\@$host", $cmd ); };
             print "Continuing after error: $@" if $@;
         }
