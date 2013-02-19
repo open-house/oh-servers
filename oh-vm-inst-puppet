@@ -3,11 +3,15 @@ use strict;
 use warnings;
 use Net::SSH qw(ssh_cmd);
 
-my $host = shift;
+my $host    = shift;
 my $release = shift;
 
 die "Usage: $0 <host> <ubuntu_release>\n" unless $host and $release;
 
+use FindBin qw($Bin);
+my $script_dir = $Bin;
+
+#<<<  do not let perltidy touch this
 my %steps = (
     a_upgrade => [
         'DEBIAN_FRONTEND=noninteractive apt-get update && apt-get -y upgrade',
@@ -22,14 +26,26 @@ my %steps = (
         "DEBIAN_FRONTEND=noninteractive dpkg -i puppetlabs-release-$release.deb",
         'DEBIAN_FRONTEND=noninteractive apt-get -y install puppet',
     ],
+    d_puppet_mysql => [
+        "puppet module install puppetlabs/mysql",
+        "LOCAL scp $script_dir/manifests/mysql.pp root\@$host:/etc/puppet/manifests/",
+    ],
 );
+#>>>
 
 for my $step ( sort keys %steps ) {
     print "==> Running step '$step'\n";
     for my $cmd ( @{ $steps{$step} } ) {
-        print "--> Running command '$cmd'\n";
-        eval { ssh_cmd( "root\@$host", $cmd ); };
-        print "Continuing after error: $@" if $@;
+        if ( $cmd =~ /^LOCAL/ ) {
+            $cmd =~ s/^LOCAL\s+//;    # remove tag
+            print "--> Running LOCAL command '$cmd'\n";
+            eval { system $cmd };
+            print "Continuing after error: $@" if $@;
+        } else {
+            print "--> Running command '$cmd'\n";
+            eval { ssh_cmd( "root\@$host", $cmd ); };
+            print "Continuing after error: $@" if $@;
+        }
     }
 }
 
