@@ -1,0 +1,84 @@
+#!/usr/bin/perl
+use strict;
+use warnings;
+use Net::SSH qw(ssh_cmd);
+
+my $host    = shift // 'localhost';
+my @steps   = @ARGV;
+
+###########################
+# Steps (group of commands)
+my $release = 'quantal';
+my $non_interactive = 'export DEBIAN_FRONTEND=noninteractive ;';
+
+use FindBin qw($Bin);
+my $script_dir = $Bin;
+
+#<<<  do not let perltidy touch this
+my %steps = (
+    a_upgrade => [
+        "$non_interactive apt-get update && apt-get -y upgrade",
+    ],
+    b_puppet_master => [
+        #"wget -q http://apt.puppetlabs.com/puppetlabs-release-$release.deb -O /tmp/puppetlabs-release-$release.deb",
+        #"$non_interactive dpkg -i puppetlabs-release-$release.deb",
+        "$non_interactive apt-get -y install puppetmaster",
+    ],
+    c_puppet_client => [
+        #"wget -q http://apt.puppetlabs.com/puppetlabs-release-$release.deb -O /tmp/puppetlabs-release-$release.deb",
+        #"$non_interactive dpkg -i puppetlabs-release-$release.deb",
+        "$non_interactive apt-get -y install puppet",
+    ],
+    d_puppet_mysql => [
+        "puppet module install puppetlabs/mysql",
+        "LOCAL scp $script_dir/manifests/mysql.pp root\@$host:/etc/puppet/manifests/",
+        "puppet apply /etc/puppet/manifests/mysql.pp",
+    ],
+    e_oh_repo => [
+        'wget -q -O - http://repos.openhouse.sk/oh_repo.gpg.key | apt-key add -',
+        'cat <<- EOF > /etc/apt/sources.list.d/oh_repo.list
+deb http://repos.openhouse.sk/debian squeeze main
+EOF',
+        'apt-get update',
+    ],
+    f_oh_pipeline_service => [
+        "$non_interactive apt-get -y install oh-pipeline-service",
+        '[[ -e /usr/lib/jvm/jdk/bin/java ]] || ( mkdir -p /usr/lib/jvm/jdk/bin/ && ln -s /usr/bin/java /usr/lib/jvm/jdk/bin/java )',
+        '/etc/init.d/oh-pipeline-service start',
+    ],
+);
+#>>>
+#
+###########################
+
+usage_and_die() unless $host and $release and @steps;
+
+sub usage_and_die {
+    print "Usage: $0 <host> <step_letter(s)>\n";
+    print "available steps (groups of comands):\n";
+    for my $step ( sort keys %steps ) {
+        ( my $letter ) = $step =~ /^(\w)_/;
+        $step =~ s/^\w_//;
+        print "\t" . $letter . " - " . $step . "\n";
+    }
+    exit 1;
+}
+
+for my $step ( sort keys %steps ) {
+    next unless grep $step =~ /^${_}_/, @steps;
+    print "> Running step '$step'\n";
+    for my $cmd ( @{ $steps{$step} } ) {
+        if ( $cmd =~ /^LOCAL/ ) {
+            $cmd =~ s/^LOCAL\s+//;    # remove tag
+            print ">> Running LOCAL command '$cmd'\n";
+            eval { system $cmd };
+            print "! Continuing after error: $@" if $@;
+        } else {
+            print ">> Running REMOTE command '$cmd'\n";
+            eval { ssh_cmd( "root\@$host", $cmd ); };
+            print "! Continuing after error: $@" if $@;
+        }
+    }
+}
+
+exit 0;
