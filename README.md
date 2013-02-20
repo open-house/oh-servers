@@ -1,24 +1,22 @@
 # oh-servers
 
-Scripts for VM provisioning and installing software on VMs.
+OH infrastructure scripts, i.e. for VM provisioning and installing software on VMs.
 
-* oh-rack-vm -- create/delete Rackspace VM
-* oh-mysql-install -- install MySQL database
-* oh-mysql-sql-pipeline-service -- execute MySQL commands
-* oh-sw-install-pipeline-service -- install SW
+* `oh-vm-rack` -- create/delete Rackspace VM
+* `oh-vm-cmds` -- run commands on VM or locally
+* `manifests/` -- puppet manifests
 
 ## Usage
 
-### Copy scripts
-
-Copy all scripts to `/usr/local/bin`:
-
-    cp oh-* /usr/local/bin
+To get help on script usage, run it without arguments.
 
 ### Create configuration files
 
-To be able to use Rackspace API create a configuration file `~/.novarc`:
+To be able to use Rackspace API create a configuration file:
 
+    touch ~/.novarc
+    chmod 600 ~/.novarc
+    cat << EOF > ~/.novarc
     OS_AUTH_URL=https://identity.api.rackspacecloud.com/v2.0/
     OS_VERSION=2.0
     OS_AUTH_SYSTEM=rackspace
@@ -28,44 +26,18 @@ To be able to use Rackspace API create a configuration file `~/.novarc`:
     OS_PASSWORD=<API_KEY>
     OS_NO_CACHE=1
     export OS_AUTH_URL OS_VERSION OS_AUTH_SYSTEM OS_REGION_NAME OS_TENANT_NAME OS_USERNAME OS_PASSWORD OS_NO_CACHE
+    EOF
 
-Make sure the file is protected:
+Create SSH client configuration file to allow non-interactive ssh connection to a new VM:
 
-    chmod 600 ~/.novarc
-
-Create configuration file `~/.oh-servers`:
-
-    OH_MYSQL_PASS=<root_db_pass>
-    export OH_MYSQL_PASS
-
-Make sure the file is protected:
-
-    chmod 600 ~/.oh-servers
-
-Create configuration file `~/.ssh/config`:
-
+    cat << EOF >> ~/.ssh/config
     # Bypass SSH key checking
+    # http://linuxcommando.blogspot.sk/2008/10/how-to-disable-ssh-host-key-checking.html
     Host *
-       StrictHostKeyChecking no
+        StrictHostKeyChecking no
+    EOF
 
-### Use the scripts
-
-To create a VM:
-
-    oh-rack-vm create <vm_name>
-    
-.. script prints VMs public IP address to STDOUT - you can use in in a shell script like this:
-
-    IP=$(oh-rack-vm create <vm_name>)
-    oh-mysql-install $IP
-    oh-mysql-sql-pipeline-service $IP
-    oh-sw-install-pipeline-service $IP
-    
-To delete a VM:
-
-    oh-rack-vm delete <vm_name>
-
-Jenkins job configuraion sample (Build => Execute shell => Command):
+### Jenkins job configuraion sample (Build => Execute shell => Command):
 
     #!/bin/bash
 
@@ -75,23 +47,27 @@ Jenkins job configuraion sample (Build => Execute shell => Command):
     # now we can print commands before executing them
     set -x
 
-    # create VM + install pipeline service
-    IP=$(oh-rack-vm create ${JOB_NAME}_${BUILD_NUMBER})
-    oh-mysql-install $IP
-    oh-mysql-sql-pipeline-service $IP
-    oh-sw-install-pipeline-service $IP
+    OH_VM_RACK="/var/lib/jenkins/oh-servers/oh-vm-rack"
+    OH_VM_CMDS="/var/lib/jenkins/oh-servers/oh-vm-cmds"
 
-    # check pipeline service is running
+    # builds a VM
+    IP=$($OH_VM_RACK create ${JOB_NAME}_${BUILD_NUMBER})
+    
+    # install SW and configure VM
+    $OH_VM_CMDS $IP a b c d e f
+
+    # check pipeline service is running and delete VM
     nc -z $IP 8080
     if [[ $? -eq 0 ]]; then
         echo "Service running on $IP, port 8080"
+        $OH_VM_RACK delete ${JOB_NAME}_${BUILD_NUMBER}
         exit 0
     else
+        $OH_VM_RACK delete ${JOB_NAME}_${BUILD_NUMBER}
         exit 1
     fi
 
-.. don't forge the first line (`#!/bin/bash`), otherwise Jenkins will print out the
-API key.
+.. don't forget the first line (`#!/bin/bash`), otherwise Jenkins will print out the API key!
 
 ### nova client (optional)
 
@@ -103,7 +79,7 @@ to install it:
     aptitude install python-pip
     pip install rackspace-novaclient
 
-command:
+commands:
 
     nova credentials
     nova list
