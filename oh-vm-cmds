@@ -72,7 +72,7 @@ for my $step ( sort keys %steps ) {
             $cmd =~ s/^LOCAL\s+//;    # remove tag
             print ">> Running LOCAL command '$cmd'\n";
             eval { system $cmd };
-            print "! Continuing after error: $@" if $@;
+            print "! Continuing after: '$@'" if $@;
         } else {
             print ">> Running REMOTE command '$cmd'\n";
             eval { ssh_cmd( "root\@$host", $cmd ); };
