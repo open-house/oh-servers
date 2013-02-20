@@ -76,7 +76,7 @@ for my $step ( sort keys %steps ) {
         } else {
             print ">> Running REMOTE command '$cmd'\n";
             eval { ssh_cmd( "root\@$host", $cmd ); };
-            print "! Continuing after error: $@" if $@;
+            print "! Continuing after: '$@'" if $@;
         }
     }
 }

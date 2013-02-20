@@ -74,7 +74,8 @@ sub create_server {
 
     my $server = {
         'server' => {
-            'imageRef'  => '8a3a9f96-b997-46fd-b7a8-a9e740796ffd',
+            #'imageRef'  => '8a3a9f96-b997-46fd-b7a8-a9e740796ffd',
+            'imageRef'  => '5bef2985-10b4-491c-abb7-d26e7176bd34', # ubuntu-quantal-image
             'flavorRef' => '2',
             'name'      => $name,
             'metadata' =>
